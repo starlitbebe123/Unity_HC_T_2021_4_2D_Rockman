@@ -559,7 +559,7 @@ GameObject:
   - component: {fileID: 481394518}
   - component: {fileID: 481394517}
   m_Layer: 5
-  m_Name: "\u756B\u5E03"
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8991,7 +8991,7 @@ GameObject:
   - component: {fileID: 1840668684}
   - component: {fileID: 1840668683}
   m_Layer: 0
-  m_Name: "\u73A9\u5BB6"
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9128,7 +9128,7 @@ GameObject:
   - component: {fileID: 2112507734}
   - component: {fileID: 2112507733}
   m_Layer: 0
-  m_Name: "\u9B54\u738B\u9B42 BGM \u30CD\u30AA\u30ED\u30C3\u30AF83"
+  m_Name: BGM
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
