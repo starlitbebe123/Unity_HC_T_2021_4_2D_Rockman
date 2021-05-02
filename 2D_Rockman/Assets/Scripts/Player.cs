@@ -2,6 +2,7 @@
 
 public class Player : MonoBehaviour
 {
+    #region 欄位
     [Header("移動速度")]
     [Range(0, 1000)]
     public float playerSpeed = 10.5f;
@@ -36,4 +37,55 @@ public class Player : MonoBehaviour
     AudioSource aud;
     Rigidbody2D rig;
     Animator ani;
+    #endregion
+
+    #region 方法
+
+    private void Movement()
+    {
+
+    }
+    /// <summary>
+    /// 跳越
+    /// </summary>
+    private void Jump()
+    {
+
+    }
+
+    /// <summary>
+    /// 射擊
+    /// </summary>
+    private void Shoot()
+    {
+
+    }
+
+    /// <summary>
+    /// 受傷
+    /// </summary>
+    /// <param name="dmg">受到的傷害值</param>
+    private void Hurt(float dmg)
+    {
+ 
+    }
+
+    /// <summary>
+    /// 死亡
+    /// </summary>
+    /// <returns>是否死亡</returns>
+    private bool Death()
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// 吃道具
+    /// </summary>
+    /// <param name="itemName">道具名稱</param>
+    private void ItemGet(string itemName)
+    {
+
+    }
 }
+#endregion

@@ -126,6 +126,9 @@ public class Car : MonoBehaviour
         //以下舉例為"音效為【選填式參數】"
         Drive(70, "閃電特效"); //錯誤-會把特效放在音效上
         Drive(70, effect: "閃電音效"); //正確-指定特效參數
+
+        float bmi = BMI(1.68f,60);
+        print("計算後的BMI:" + bmi); 
     }
     //更新事件執行時間點與次數: 開始事件後以每秒六十次執行 60FPS
     //應用:監控玩家輸入與物件的持續行為，例如:玩家有沒有按按鈕或讓物件持續移動
@@ -187,6 +190,17 @@ public class Car : MonoBehaviour
         print("開車時數:" + speed);
         print("開車音效:" + sound);
         print("特效:" + effect);
+    }
+
+    /// <summary>
+    /// BMI計算方法
+    /// </summary>
+    /// <param name="height">請輸入身高(m)</param>
+    /// <param name="weight">請輸入體重(kg)</param>
+    /// <returns></returns>
+    private float BMI(float height, float weight)
+    {
+        return weight / (height * height);
     }
 
 
