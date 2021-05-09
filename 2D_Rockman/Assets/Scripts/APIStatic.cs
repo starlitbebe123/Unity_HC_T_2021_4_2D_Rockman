@@ -3,12 +3,16 @@ using UnityEngine;
 
 public class APIStatic : MonoBehaviour
 {
-    //認是靜態API
+    //認識靜態API
     //包含關鍵字 static 就是靜態
- 
+
+    public Vector3 a = new Vector3(1, 1, 1);
+    public Vector3 b = new Vector3(1, 1, 1);
+
+
     private void Start()
     {
-        #region 認識靜態屬性方法方法
+        #region 認識靜態屬性方法
         //靜態取得是抓出資料，靜態存放是修改資料
 
         //屬性 欄位 要知道如何存取
@@ -42,22 +46,31 @@ public class APIStatic : MonoBehaviour
         #endregion
         
         //練習靜態屬性
+        
         //靜態取得
         print("攝影機數量:" + Camera.allCamerasCount);
-        print("2D重力大小:" + Physics2D.gravity);
+       
         //靜態存放
-        Physics2D.gravity = new Vector2(0, -20);
-
+        Physics2D.gravity = new Vector2(Physics2D.gravity.x, -20);
+        print("2D重力大小:" + Physics2D.gravity);
+        
         //練習靜態方法
         //使用
-        //Application.OpenURL; 
+        Application.OpenURL("https://unity.com/");
+        float f = Mathf.Floor(9.9999f);
+        print("去掉小數點" + f);
 
+        float dis = Vector3.Distance(a, b);
+        print("a與b的距離" + dis);
+       
     }
 
     private void Update()
     {
         //靜態取得
         print("是否輸入任意鍵:" + Input.anyKeyDown); 
-        print("經過時間:" + Time.time); 
+        print("經過時間:" + Time.time);
+        bool b = Input.GetKeyDown(KeyCode.Space);
+        print("是否輸入空白鍵:" + b);
     }
 }
