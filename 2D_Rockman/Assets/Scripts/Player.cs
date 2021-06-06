@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
 
     [Header("開槍音效")]
     [Tooltip("開槍的音效")]
-    public AudioClip fireSound;
+    public AudioClip FireSound;
 
     [Header("跳力道")]
     [Tooltip("跳力道")]
@@ -64,6 +64,7 @@ public class Player : MonoBehaviour
     {
         Movement();
         Jump();
+        Shoot(); 
     }
 
     //繪製圖示 - 輔助編輯時的圖形線條
@@ -154,7 +155,12 @@ public class Player : MonoBehaviour
     /// </summary>
     private void Shoot()
     {
-
+        //如果 玩家按下左鍵 就開槍 - 動畫與音效 發射子彈
+        if (Input.GetKeyDown(KeyCode.Mouse0)) 
+        {
+            ani.SetTrigger("Fire");
+            aud.PlayOneShot(FireSound, 1f); 
+        }
     }
 
     /// <summary>

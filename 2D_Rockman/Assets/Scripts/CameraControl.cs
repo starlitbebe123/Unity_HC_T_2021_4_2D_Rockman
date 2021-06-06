@@ -9,8 +9,8 @@ public class CameraControl : MonoBehaviour
     public float speed = 30;
 
     //邊界
-    public Vector2 limtX = new Vector2(0f, 0);
-    public Vector2 limtY = new Vector2(0f, 0f);
+    public Vector2 limtX = new Vector2(0.9f, 125);
+    public Vector2 limtY = new Vector2(0, 0.65f);
     
     #endregion
 
@@ -24,11 +24,11 @@ public class CameraControl : MonoBehaviour
         vCam = Vector3.Lerp(vCam, vPla, 0.5f * speed * Time.deltaTime);
         //將攝影機z軸恢復成預設的-10
         vCam.z = -10; 
-        //更新攝影機座標
-        transform.position = vCam;
         //夾住X與Y軸
         vCam.x = Mathf.Clamp(vCam.x, limtX.x, limtX.y);
-        vCam.y = Mathf.Clamp(vCam.y, limtY.x, limtY.y);
+        vCam.y = Mathf.Clamp(vCam.y, limtY.x, limtY.y); 
+        //更新攝影機座標(這行要放在最後)
+        transform.position = vCam;
     }
     #endregion
 
