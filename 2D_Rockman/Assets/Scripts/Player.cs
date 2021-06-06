@@ -17,7 +17,7 @@ public class Player : MonoBehaviour
 
     [Header("是否在地板上")]
     [Tooltip("判斷是否在地板上")]
-    public bool Grounded = false;
+    public bool isGrounded = false;
 
     [Header("判斷地板碰撞的位移與半徑")]
     [Tooltip("判斷是否在地板上")]
@@ -39,6 +39,10 @@ public class Player : MonoBehaviour
     [Tooltip("開槍的音效")]
     public AudioClip fireSound;
 
+    [Header("跳力道")]
+    [Tooltip("跳力道")]
+    public float jump;
+
     AudioSource aud;
     Rigidbody2D rig;
     Animator ani;
@@ -51,8 +55,7 @@ public class Player : MonoBehaviour
     {
         //利用程式取得元件
         //傳回元件 取得元件() - <泛型>
-        rig = GetComponent<Rigidbody2D>(); 
-
+        rig = GetComponent<Rigidbody2D>();
     }
     //一秒約執行60次
     private void Update()
@@ -80,27 +83,46 @@ public class Player : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         //鋼體.加速度 = 二維向量(水平 * 速度 * 一幀的時間, 0); 
         //一幀的時間 - 解決不同效能的裝置速度差問題, 指定回原本的Y軸加速度)
-        rig.velocity = new Vector2(h * playerSpeed * Time.deltaTime, rig.velocity.y); 
+        rig.velocity = new Vector2(h * playerSpeed * Time.deltaTime, rig.velocity.y);
     }
-    #region 方法
+    #endregion
+    #region #region 方法
     /// <summary>
     /// 跳越
     /// </summary>
     private void Jump()
     {
-        //如果 玩家 按下空白鍵 就 往上跳躍
+        //如果 玩家 按下空白鍵 並且 在地板上 就 往上跳躍
         //判斷式C#
         //if(布林值){當布林值等於true時會執行這個程式}
-        if (Grounded)
-        {
+        //*判斷布林值是否等於true有兩種寫法
+        //1. isGrounded == true 一般寫法
+        //2. isGrounded 簡略寫法
 
-
-            if (Input.GetKeyDown(KeyCode.W))
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             {
-                print("跳躍");
+                
                 //鋼體.添加推力(二維向量);
-                rig.AddForce(new Vector2(0, 300));
+                rig.AddForce(new Vector2(0, jump));
             }
+
+            //碰到的物件= 2D物理.覆蓋圖形(中心點, 半徑);
+            //圖層語法: 1<< 圖層編號(LayerMask int)
+        Collider2D hit = Physics2D.OverlapCircle(transform.position + groundOffset, groundRadius, 1<<8);
+        
+        //如果 碰到的物件 存在 並且 碰到的物件名稱 等於等於 地板 就代表在地板上
+        //並且 &&
+        //等於 ==
+        if(hit && hit.name == "地板")
+        {
+            isGrounded = true;
+        }
+        //否則 不再地板上
+        //否則 else
+        //語法: else{程式區塊} 只能寫在if下方
+        else 
+        { 
+            isGrounded = false;  
         }
     }
 
@@ -140,4 +162,3 @@ public class Player : MonoBehaviour
     }
     #endregion
 }
-#endregion
