@@ -56,6 +56,8 @@ public class Player : MonoBehaviour
         //利用程式取得元件
         //傳回元件 取得元件() - <泛型>
         rig = GetComponent<Rigidbody2D>();
+        ani = GetComponent<Animator>();
+        aud = GetComponent<AudioSource>();
     }
     //一秒約執行60次
     private void Update()
@@ -72,7 +74,7 @@ public class Player : MonoBehaviour
         Gizmos.color = new Color(1,0,0,0.5f);
         //2.繪製圖形
         //transform可以抓到此腳本同一層的變形元件
-        Gizmos.DrawSphere(transform.position + groundOffset, groundRadius); 
+        Gizmos.DrawSphere(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y ,groundRadius); 
     }
 
     private void Movement()
@@ -84,6 +86,24 @@ public class Player : MonoBehaviour
         //鋼體.加速度 = 二維向量(水平 * 速度 * 一幀的時間, 0); 
         //一幀的時間 - 解決不同效能的裝置速度差問題, 指定回原本的Y軸加速度)
         rig.velocity = new Vector2(h * playerSpeed * Time.deltaTime, rig.velocity.y);
+
+        //翻面
+        //如果 按下 D 面向右邊 0,0,0
+        //否則 如果 按下A面向左邊 0,180,0
+        //rotation只有0跟1通常不要用, 用eulerAngles
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            transform.eulerAngles = Vector3.zero;
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            transform.eulerAngles = new Vector3(0,180,0);
+        }
+
+        //設定動畫
+        //水平值 不等於 零 布林值 打勾
+        //水平值 等於 零 布林值 取消
+        ani.SetBool("Run", h != 0); 
     }
     #endregion
     #region #region 方法
@@ -108,12 +128,12 @@ public class Player : MonoBehaviour
 
             //碰到的物件= 2D物理.覆蓋圖形(中心點, 半徑);
             //圖層語法: 1<< 圖層編號(LayerMask int)
-        Collider2D hit = Physics2D.OverlapCircle(transform.position + groundOffset, groundRadius, 1<<8);
+        Collider2D hit = Physics2D.OverlapCircle(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y, groundRadius, 1<<8);
         
         //如果 碰到的物件 存在 並且 碰到的物件名稱 等於等於 地板 就代表在地板上
         //並且 &&
         //等於 ==
-        if(hit && hit.name == "地板")
+        if(hit && (hit.name == "地板" || hit.name == "跳台"))
         {
             isGrounded = true;
         }
@@ -125,6 +145,9 @@ public class Player : MonoBehaviour
             isGrounded = false;  
         }
     }
+
+
+  
 
     /// <summary>
     /// 射擊
