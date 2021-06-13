@@ -28,12 +28,13 @@ public class Player : MonoBehaviour
     [Tooltip("子彈(遊戲物件)")]
     public GameObject bullet;
 
-    [Header("子彈生成點")]
-    [Tooltip("子彈生成點")]
-    public Transform bulletSpawn;
-
+    [Header("子彈生成位置")]
+    [Tooltip("子彈生成位置")]
+    public Vector3 posBullet;
+   
     [Range(0, 5000)]
     public float bulletSpeed;
+    private float bulletTimer;
 
     [Header("開槍音效")]
     [Tooltip("開槍的音效")]
@@ -58,13 +59,16 @@ public class Player : MonoBehaviour
         rig = GetComponent<Rigidbody2D>();
         ani = GetComponent<Animator>();
         aud = GetComponent<AudioSource>();
+
+        //2D物理. 忽略圖層碰撞(圖層1, 圖層2, 是否要忽略);
+        Physics2D.IgnoreLayerCollision(9, 10, true); 
     }
     //一秒約執行60次
     private void Update()
     {
         Movement();
         Jump();
-        Shoot(); 
+        Fire(); 
     }
 
     //繪製圖示 - 輔助編輯時的圖形線條
@@ -75,7 +79,14 @@ public class Player : MonoBehaviour
         Gizmos.color = new Color(1,0,0,0.5f);
         //2.繪製圖形
         //transform可以抓到此腳本同一層的變形元件
-        Gizmos.DrawSphere(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y ,groundRadius); 
+        //物件的右方X軸：transform.right
+        //物件的右方Y軸：transform.up
+        //物件的右方Z軸：transform.foward
+        Gizmos.DrawSphere(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y ,groundRadius);
+
+        //先指定顏色在畫圖型
+        Gizmos.color = new Color(0, 0, 1, 0.5f);
+        Gizmos.DrawSphere(transform.position + transform.right * posBullet.x + transform.up * posBullet.y, 0.1f);
     }
 
     private void Movement()
@@ -120,47 +131,89 @@ public class Player : MonoBehaviour
         //1. isGrounded == true 一般寫法
         //2. isGrounded 簡略寫法
 
-            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            {
-                
-                //鋼體.添加推力(二維向量);
-                rig.AddForce(new Vector2(0, jump));
-            }
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
 
-            //碰到的物件= 2D物理.覆蓋圖形(中心點, 半徑);
-            //圖層語法: 1<< 圖層編號(LayerMask int)
-        Collider2D hit = Physics2D.OverlapCircle(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y, groundRadius, 1<<8);
-        
+            //鋼體.添加推力(二維向量);
+            rig.AddForce(new Vector2(0, jump));
+        }
+
+        //碰到的物件= 2D物理.覆蓋圖形(中心點, 半徑);
+        //圖層語法: 1<< 圖層編號(LayerMask int)
+        Collider2D hit = Physics2D.OverlapCircle(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y, groundRadius, 1 << 8);
+
         //如果 碰到的物件 存在 並且 碰到的物件名稱 等於等於 地板 就代表在地板上
         //並且 &&
         //等於 ==
-        if(hit && (hit.name == "地板" || hit.name == "跳台"))
+        if (hit && (hit.name == "地板" || hit.name == "跳台"))
         {
             isGrounded = true;
         }
         //否則 不再地板上
         //否則 else
         //語法: else{程式區塊} 只能寫在if下方
-        else 
-        { 
-            isGrounded = false;  
+        else
+        {
+            isGrounded = false;
         }
     }
-
-
-  
-
     /// <summary>
     /// 射擊
     /// </summary>
-    private void Shoot()
+    private void Fire()
     {
         //如果 玩家按下左鍵 就開槍 - 動畫與音效 發射子彈
-        if (Input.GetKeyDown(KeyCode.Mouse0)) 
+        if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             ani.SetTrigger("Fire");
-            aud.PlayOneShot(FireSound, 1f); 
+            aud.PlayOneShot(FireSound, 1f);
+
+            //Object.Instantiate(bullet); 原始寫法
+            //Instantiate(bullet);簡寫
+            //生成(物件,座標,角度);
+            //Quaternion 四位元-角度
+            //Quaternion.identity 零角度
+            GameObject temp = Instantiate(bullet, transform.position + transform.right * posBullet.x + transform.up * posBullet.y, Quaternion.identity);
+
+            //暫存物件.取得元件<2D鋼體>().添加推力(角色前方 * 子彈速度)
+            temp.GetComponent<Rigidbody2D>().AddForce(transform.right * bulletSpeed);
+            //刪除(物件, 延遲秒數)
+            Destroy(temp, 2f);
         }
+
+        //否則如果
+        //else if(布林值){程式區塊}
+        //GetKey按住
+        //為了集氣, 紀錄按住時間
+        else if (Input.GetKey(KeyCode.Mouse0))
+        {
+            //累加 +=
+            bulletTimer += Time.deltaTime;
+        }
+        //GetKeyUp放開
+        else if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            ani.SetTrigger("Fire");
+            aud.PlayOneShot(FireSound, 1f);
+            GameObject temp = Instantiate(bullet, transform.position + transform.right * posBullet.x + transform.up * posBullet.y, Quaternion.identity); 
+            temp.GetComponent<Rigidbody2D>().AddForce(transform.right * bulletSpeed);
+            Destroy(temp, 1);
+
+            //讓子彈的角度跟玩家目前角度相同(如果子彈形狀有分前後)
+            //取得粒子的渲染元件
+            ParticleSystemRenderer render = temp.GetComponent<ParticleSystemRenderer>();
+            //渲染的翻面 = 角色的角度 - ? : 三元運算子
+            render.flip = new Vector3(transform.eulerAngles.y == 0 ? 0 : 1, 0,0); 
+
+            //計時器 = 數學.夾住(計時器, 最小, 最大);
+            bulletTimer = Mathf.Clamp(bulletTimer, 0, 5);
+            //按越久, 放開時子彈越大顆
+            temp.transform.localScale = Vector3.one + Vector3.one * bulletTimer;
+            //計時器歸零
+            bulletTimer = 0; 
+        
+        }
+
     }
 
     /// <summary>

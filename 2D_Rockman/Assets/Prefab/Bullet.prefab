@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6601945119458320915}
   - component: {fileID: 8851314484291013925}
   - component: {fileID: 5953864204420551596}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.5
+      scalar: 0.1
       minScalar: 5
       maxCurve:
         serializedVersion: 2
