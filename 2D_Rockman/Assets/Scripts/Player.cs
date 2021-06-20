@@ -44,9 +44,11 @@ public class Player : MonoBehaviour
     [Tooltip("跳力道")]
     public float jump;
 
+    float attack = 10;
     AudioSource aud;
     Rigidbody2D rig;
     Animator ani;
+    ParticleSystem ps;
     #endregion
 
     //按右上...的Debug可以看到private的
@@ -61,7 +63,9 @@ public class Player : MonoBehaviour
         aud = GetComponent<AudioSource>();
 
         //2D物理. 忽略圖層碰撞(圖層1, 圖層2, 是否要忽略);
-        Physics2D.IgnoreLayerCollision(9, 10, true); 
+        Physics2D.IgnoreLayerCollision(9, 10, true);
+        //粒子系統 = 變形元件, 搜尋子物件("子物件名稱")
+        ps = transform.Find("Charge").GetComponent<ParticleSystem>();
     }
     //一秒約執行60次
     private void Update()
@@ -118,7 +122,7 @@ public class Player : MonoBehaviour
         ani.SetBool("Run", h != 0); 
     }
     #endregion
-    #region #region 方法
+    #region 方法
     /// <summary>
     /// 跳越
     /// </summary>
@@ -165,6 +169,7 @@ public class Player : MonoBehaviour
         //如果 玩家按下左鍵 就開槍 - 動畫與音效 發射子彈
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
+            ps.Play(); 
             ani.SetTrigger("Fire");
             aud.PlayOneShot(FireSound, 1f);
 
@@ -177,6 +182,9 @@ public class Player : MonoBehaviour
 
             //暫存物件.取得元件<2D鋼體>().添加推力(角色前方 * 子彈速度)
             temp.GetComponent<Rigidbody2D>().AddForce(transform.right * bulletSpeed);
+            //暫存物件.添加元件<子彈>();
+            //AddComponent可以為物件添加新元件
+            temp.AddComponent<Bullet>(); 
             //刪除(物件, 延遲秒數)
             Destroy(temp, 2f);
         }
@@ -193,6 +201,7 @@ public class Player : MonoBehaviour
         //GetKeyUp放開
         else if (Input.GetKeyUp(KeyCode.Mouse0))
         {
+            ps.Stop();
             ani.SetTrigger("Fire");
             aud.PlayOneShot(FireSound, 1f);
             GameObject temp = Instantiate(bullet, transform.position + transform.right * posBullet.x + transform.up * posBullet.y, Quaternion.identity); 
@@ -207,10 +216,16 @@ public class Player : MonoBehaviour
 
             //計時器 = 數學.夾住(計時器, 最小, 最大);
             bulletTimer = Mathf.Clamp(bulletTimer, 0, 5);
+
+            //攻擊力 累加 四捨五入(計時器)*2
+            
+            temp.GetComponent<Bullet>().attack = attack + Mathf.Round(bulletTimer) * 2;
+
             //按越久, 放開時子彈越大顆
             temp.transform.localScale = Vector3.one + Vector3.one * bulletTimer;
             //計時器歸零
             bulletTimer = 0; 
+
         
         }
 
