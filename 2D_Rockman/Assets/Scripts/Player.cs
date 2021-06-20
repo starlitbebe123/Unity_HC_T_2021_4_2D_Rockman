@@ -70,6 +70,7 @@ public class Player : MonoBehaviour
     //一秒約執行60次
     private void Update()
     {
+        if (Death()) return; //只要Death() = true, 就不執行下面的動作
         Movement();
         Jump();
         Fire(); 
@@ -235,9 +236,12 @@ public class Player : MonoBehaviour
     /// 受傷
     /// </summary>
     /// <param name="dmg">受到的傷害值</param>
-    private void Hurt(float dmg)
+    
+    //因為會動到其他程式, 所以一定要public
+    public void Hit(float dmg)
     {
- 
+        playerHealth -= dmg;
+        if (playerHealth <= 0) Death(); 
     }
 
     /// <summary>
@@ -246,7 +250,9 @@ public class Player : MonoBehaviour
     /// <returns>是否死亡</returns>
     private bool Death()
     {
-        return false;
+        ani.SetBool("Death", playerHealth<=0); 
+        //只要playerHealth小於等於0, 就會回傳Death() = true;
+        return playerHealth <=0;
     }
 
     /// <summary>

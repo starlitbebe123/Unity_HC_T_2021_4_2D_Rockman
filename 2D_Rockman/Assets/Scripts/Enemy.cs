@@ -25,7 +25,11 @@ public class Enemy : MonoBehaviour
     public Vector3 groundOffset;
     public float groundRadius = 0.1f;
 
-    
+    [Header("攻擊區域位移與尺寸")]
+    public Vector3 attackOffset;
+    public Vector3 attackSize;
+
+
     //原始速度
     private float speedOriginal;
     
@@ -64,6 +68,10 @@ public class Enemy : MonoBehaviour
         //偵測面前是不是地板
         Gizmos.color = new Color(0.6f, 0.9f, 1, 0.7f);
         Gizmos.DrawSphere(transform.position + transform.right * groundOffset.x + transform.up * groundOffset.y, groundRadius);
+
+        //攻擊範圍
+        Gizmos.color = new Color(0.3f, 0.3f, 1, 0.8f);
+        Gizmos.DrawCube(transform.position + transform.right * attackOffset.x + transform.up * attackOffset.y, attackSize); 
     }
     #endregion
     #region 方法
@@ -96,7 +104,7 @@ public class Enemy : MonoBehaviour
 
     private void Attack()
     {
-        ani.SetBool("走路開關", false); 
+        ani.SetBool("Walk", false); 
         //如果 計時器 <= 攻擊冷卻 就累加
         if (cdTimer <= cd)
         {
@@ -105,9 +113,11 @@ public class Enemy : MonoBehaviour
         //否則 攻擊 並 將計時器歸零
         else
         {
-            cdTimer = 0; 
+            cdTimer = 0;
             ani.SetTrigger("Attack");
-            
+            //碰撞物件 = 2D物理.覆蓋盒形(中心點, 尺寸, 角度)
+            Collider2D hit = Physics2D.OverlapBox(transform.position + transform.right * attackOffset.x + transform.up * attackOffset.y, attackSize, 0);
+            if (hit && hit.tag == "Player") hit.GetComponent<Player>().Hit(attack); 
         }
     }
 
