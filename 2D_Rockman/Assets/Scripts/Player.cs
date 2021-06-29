@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.UI; //引用介面API
+using UnityEngine.SceneManagement;
+using System.Collections;// 引用系統集合API
 
 public class Player : MonoBehaviour
 {
@@ -13,7 +16,8 @@ public class Player : MonoBehaviour
 
     [Header("血量")]
     [Range(0, 200)]
-    public float playerHealth = 100f;
+    public float Hp;
+    public float MaxHp = 100f;
 
     [Header("是否在地板上")]
     [Tooltip("判斷是否在地板上")]
@@ -31,7 +35,7 @@ public class Player : MonoBehaviour
     [Header("子彈生成位置")]
     [Tooltip("子彈生成位置")]
     public Vector3 posBullet;
-   
+
     [Range(0, 5000)]
     public float bulletSpeed;
     private float bulletTimer;
@@ -49,11 +53,24 @@ public class Player : MonoBehaviour
     Rigidbody2D rig;
     Animator ani;
     ParticleSystem ps;
+
+    Image imgHp;
+    Text textHp;
+
+    //靜態 static
+    //1. 靜態欄位重新啟動後不會還原預設值
+    //2. 靜態欄位不會顯示在屬性面板上
+    public static int Life = 3;
+
+    private CanvasGroup groupFinal;
+
     #endregion
 
     //按右上...的Debug可以看到private的
 
     #region 事件
+    private Text textFinalTitle;
+    
     private void Start()
     {
         //利用程式取得元件
@@ -66,8 +83,23 @@ public class Player : MonoBehaviour
         Physics2D.IgnoreLayerCollision(9, 10, true);
         //粒子系統 = 變形元件, 搜尋子物件("子物件名稱")
         ps = transform.Find("Charge").GetComponent<ParticleSystem>();
+
+        //遊戲物件.尋找("物件名稱")
+        //不能尋找隱藏物件
+        imgHp = GameObject.Find("LifeHp").GetComponent<Image>();
+        textHp = GameObject.Find("LifeText").GetComponent<Text>();
+        textHp.text = Life.ToString();
+        Hp = MaxHp; 
+
+        groupFinal = GameObject.Find("結束畫面").GetComponent<CanvasGroup>();
+        textFinalTitle = GameObject.Find("結束標題").GetComponent<Text>(); 
     }
     //一秒約執行60次
+
+    private void FixedUpdate()//跟物理有關的放FixedUpdate才不會忽快忽慢
+    {
+        MoveFixed(); 
+    }
     private void Update()
     {
         if (Death()) return; //只要Death() = true, 就不執行下面的動作
@@ -94,15 +126,20 @@ public class Player : MonoBehaviour
         Gizmos.DrawSphere(transform.position + transform.right * posBullet.x + transform.up * posBullet.y, 0.1f);
     }
 
-    private void Movement()
+    private void MoveFixed() 
     {
-        //1.要抓到玩家按下左右鍵的資訊Input
         //2.使用左右鍵的資訊控制腳色移動
         //水平移動，按左鍵會是-1，按右鍵會是1，不按是0
-        float h = Input.GetAxis("Horizontal");
+       
         //鋼體.加速度 = 二維向量(水平 * 速度 * 一幀的時間, 0); 
         //一幀的時間 - 解決不同效能的裝置速度差問題, 指定回原本的Y軸加速度)
         rig.velocity = new Vector2(h * playerSpeed * Time.deltaTime, rig.velocity.y);
+    }
+    float h ;
+    private void Movement()
+    {
+        //1.要抓到玩家按下左右鍵的資訊Input
+      h  = Input.GetAxis("Horizontal")
 
         //翻面
         //如果 按下 D 面向右邊 0,0,0
@@ -230,18 +267,61 @@ public class Player : MonoBehaviour
         
         }
 
+
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        EatItem(collision.gameObject); 
+    }
+
+    //與粒子碰撞會執行事件
+    //1. 要有碰撞器
+    //2. 粒子要勾選傳送訊息的選項
+    //在ParticleSystem要勾選
+    //1. Collision
+    //1-2.Type World
+    //1-3.Mode 2D
+    //1-4. Send Collision Mesages
+    private void OnParticleCollision(GameObject other)
+    {
+        Hit(other.GetComponent<ParticleSystemData>().attack); 
+    }
+
+
+
+    void EatItem(GameObject Item) 
+    {
+        if (Item.tag == "Item") 
+        {
+            //字串 API Remove(編號) //刪除 編號順序 後面的字串
+            
+            switch (Item.name.Remove(2)) //把"補血(Clone)"的第2個字後的字去掉
+            {
+                case "Potion":
+                    Hp += 30;
+                    Hp = Mathf.Clamp(Hp, 0, MaxHp);
+                    imgHp.fillAmount = Hp / MaxHp;
+
+                    break;
+
+                case "MagicPotion":
+                    break;
+            }
+        }    
+    }
     /// <summary>
     /// 受傷
     /// </summary>
     /// <param name="dmg">受到的傷害值</param>
-    
+
     //因為會動到其他程式, 所以一定要public
     public void Hit(float dmg)
     {
-        playerHealth -= dmg;
-        if (playerHealth <= 0) Death(); 
+        Hp -= dmg;
+        imgHp.fillAmount = Hp / MaxHp; //圖片.長度 = 血量 / 最大血量
+        if (Hp <= 0) Death(); 
+
     }
 
     /// <summary>
@@ -250,9 +330,39 @@ public class Player : MonoBehaviour
     /// <returns>是否死亡</returns>
     private bool Death()
     {
-        ani.SetBool("Death", playerHealth<=0); 
-        //只要playerHealth小於等於0, 就會回傳Death() = true;
-        return playerHealth <=0;
+        if(!ani.GetBool("Death") && Hp <=0)
+        {
+            ani.SetBool("Death", Hp <= 0);
+            Life--;//生命遞減
+            textHp.text = Life.ToString(); // ToString 把數字文字化, 更新生命數量
+            if(Life > 0)
+            Invoke("Replay", 1f);
+            else
+            StartCoroutine(GameOver()); //啟動協同程序
+        }
+
+        return Hp <=0; //只要playerHealth小於等於0, 就會回傳Death() = true;
+    }
+
+    public  IEnumerator GameOver(string finalTitle = "GameOver") 
+    {
+        textFinalTitle.text = finalTitle; 
+        //FadeIn效果
+        while (groupFinal.alpha < 1)//while迴圈,會重複執行
+        {
+            //透明度小於1時 透明度遞增0.05
+            groupFinal.alpha += 0.05f;
+            //間隔0.02秒
+            yield return new WaitForSeconds(0.02f); 
+        }
+        groupFinal.interactable = true; //允許 互動
+        groupFinal.blocksRaycasts = true; //允許 滑鼠選擇
+
+    }
+
+    private void Replay()
+    {
+        SceneManager.LoadScene("遊戲畫面"); 
     }
 
     /// <summary>

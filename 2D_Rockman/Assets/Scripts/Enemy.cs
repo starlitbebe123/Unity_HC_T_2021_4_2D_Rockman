@@ -8,18 +8,18 @@ public class Enemy : MonoBehaviour
   
     public float attack = 10f;
    
-    public float hp = 30f;
+    public float hp;
 
     public float radiusTrack = 5;
 
     public float radiusAttack = 2;
 
     public float cd = 3;
-    private float cdTimer;
+    protected float cdTimer;
 
-    private Transform player;
+    protected Transform player;
     private Rigidbody2D rig;
-    private Animator ani;
+    protected Animator ani;
 
     [Header("偵測地板的位移與半徑")]
     public Vector3 groundOffset;
@@ -29,6 +29,8 @@ public class Enemy : MonoBehaviour
     public Vector3 attackOffset;
     public Vector3 attackSize;
 
+    public GameObject Item;
+    public float dropRate;
 
     //原始速度
     private float speedOriginal;
@@ -37,7 +39,7 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region 事件
-    private void Start()
+    protected virtual void Start()
     {
         ani = GetComponent<Animator>();
         rig = GetComponent<Rigidbody2D>();
@@ -57,6 +59,16 @@ public class Enemy : MonoBehaviour
         Move();
     }
 
+    private void dropItem()
+    {
+        float r = Random.value; 
+
+        if (r <= dropRate) 
+        {
+            Instantiate(Item, transform.position, Quaternion.identity);
+        }
+
+    }
     private void OnDrawGizmos()
     {
         //追蹤範圍
@@ -86,7 +98,8 @@ public class Enemy : MonoBehaviour
         //如果 玩家跟敵人 的 距離 小於等於 攻擊範圍 就攻擊
         if (dis <= radiusAttack)
         {
-            Attack(); 
+            Attack();
+            LookAtPlayer();
         }
         //否則 如果 玩家跟敵人 的 距離 小於等於 追蹤範圍 就往前方移動
         else if (dis <= radiusTrack) 
@@ -113,12 +126,17 @@ public class Enemy : MonoBehaviour
         //否則 攻擊 並 將計時器歸零
         else
         {
-            cdTimer = 0;
-            ani.SetTrigger("Attack");
-            //碰撞物件 = 2D物理.覆蓋盒形(中心點, 尺寸, 角度)
-            Collider2D hit = Physics2D.OverlapBox(transform.position + transform.right * attackOffset.x + transform.up * attackOffset.y, attackSize, 0);
-            if (hit && hit.tag == "Player") hit.GetComponent<Player>().Hit(attack); 
+            AttackState(); 
         }
+    }
+
+    protected virtual void AttackState() 
+    {
+        cdTimer = 0;
+        ani.SetTrigger("Attack");
+        //碰撞物件 = 2D物理.覆蓋盒形(中心點, 尺寸, 角度)
+        Collider2D hit = Physics2D.OverlapBox(transform.position + transform.right * attackOffset.x + transform.up * attackOffset.y, attackSize, 0);
+        if (hit && hit.tag == "Player") hit.GetComponent<Player>().Hit(attack);
     }
 
     private void LookAtPlayer() 
@@ -128,7 +146,7 @@ public class Enemy : MonoBehaviour
         { 
             transform.eulerAngles = new Vector3(0, 180, 0);
         }
-        //否則 敵人x 小於 玩家x 就代表玩家在右邊 角度0
+        //否則 敵人x 小於 玩家x 就代at玩家在右邊 角度0
         else 
         {
             transform.eulerAngles = Vector3.zero;
@@ -147,7 +165,7 @@ public class Enemy : MonoBehaviour
         
     }
 
-    private void Dead() 
+    protected virtual void Dead() 
     {
         ani.SetBool("Death", true);
         //碰撞氣關閉
@@ -159,7 +177,7 @@ public class Enemy : MonoBehaviour
         //兩秒後刪除
         Destroy(gameObject, 2); 
     }
-    public void Hit(float damage) 
+    public virtual void Hit(float damage) //加virtual就可以讓子物件使用
     {
         hp -= damage;
         if (hp <= 0) Dead(); 

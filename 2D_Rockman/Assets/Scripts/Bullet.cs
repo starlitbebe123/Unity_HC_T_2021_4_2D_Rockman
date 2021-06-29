@@ -10,6 +10,7 @@ public class Bullet : MonoBehaviour
     {
         //讓這兩個編號的圖層間不會產生碰撞(十號跟十號)
         Physics2D.IgnoreLayerCollision(10, 10, true);
+        Physics2D.IgnoreLayerCollision(10, 11, true);
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
