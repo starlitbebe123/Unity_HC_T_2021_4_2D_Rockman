@@ -721,6 +721,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Flame
       objectReference: {fileID: 0}
+    - target: {fileID: 3307904143060979543, guid: 3a6b8462cc7474e43b145a623ee0b356,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8446912482574139269, guid: 3a6b8462cc7474e43b145a623ee0b356,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1667,7 +1672,7 @@ PrefabInstance:
     - target: {fileID: 1359884129464226161, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1359884129464226164, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
@@ -10254,7 +10259,7 @@ PrefabInstance:
     - target: {fileID: 1359884129464226161, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1359884129464226164, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
@@ -10264,7 +10269,7 @@ PrefabInstance:
     - target: {fileID: 1359884129464226164, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
       propertyPath: m_Mass
-      value: 5
+      value: 900
       objectReference: {fileID: 0}
     - target: {fileID: 1359884129464226164, guid: e7cb48457a8b2ae48b36c47c93a6f2e0,
         type: 3}
@@ -10455,6 +10460,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3005005328863109908, guid: bc4ebab6de4f1f448aad5792a2c9dcfb,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 6200000, guid: 161d5224218af0f42aca6d0adaa987af, type: 2}
     - target: {fileID: 3005005328863109909, guid: bc4ebab6de4f1f448aad5792a2c9dcfb,
         type: 3}
       propertyPath: Hp

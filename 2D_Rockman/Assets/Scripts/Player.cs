@@ -56,6 +56,7 @@ public class Player : MonoBehaviour
 
     Image imgHp;
     Text textHp;
+    public bool win = false;
 
     //靜態 static
     //1. 靜態欄位重新啟動後不會還原預設值
@@ -139,7 +140,7 @@ public class Player : MonoBehaviour
     private void Movement()
     {
         //1.要抓到玩家按下左右鍵的資訊Input
-      h  = Input.GetAxis("Horizontal")
+        h = Input.GetAxis("Horizontal"); 
 
         //翻面
         //如果 按下 D 面向右邊 0,0,0
@@ -318,10 +319,12 @@ public class Player : MonoBehaviour
     //因為會動到其他程式, 所以一定要public
     public void Hit(float dmg)
     {
-        Hp -= dmg;
-        imgHp.fillAmount = Hp / MaxHp; //圖片.長度 = 血量 / 最大血量
-        if (Hp <= 0) Death(); 
-
+        if (!win)
+        {
+            Hp -= dmg;
+            imgHp.fillAmount = Hp / MaxHp; //圖片.長度 = 血量 / 最大血量
+            if (Hp <= 0) Death();
+        }
     }
 
     /// <summary>
@@ -344,20 +347,23 @@ public class Player : MonoBehaviour
         return Hp <=0; //只要playerHealth小於等於0, 就會回傳Death() = true;
     }
 
+    
     public  IEnumerator GameOver(string finalTitle = "GameOver") 
     {
-        textFinalTitle.text = finalTitle; 
-        //FadeIn效果
-        while (groupFinal.alpha < 1)//while迴圈,會重複執行
+        if (!win)
         {
-            //透明度小於1時 透明度遞增0.05
-            groupFinal.alpha += 0.05f;
-            //間隔0.02秒
-            yield return new WaitForSeconds(0.02f); 
+            textFinalTitle.text = finalTitle;
+            //FadeIn效果
+            while (groupFinal.alpha < 1)//while迴圈,會重複執行
+            {
+                //透明度小於1時 透明度遞增0.05
+                groupFinal.alpha += 0.05f;
+                //間隔0.02秒
+                yield return new WaitForSeconds(0.02f);
+            }
+            groupFinal.interactable = true; //允許 互動
+            groupFinal.blocksRaycasts = true; //允許 滑鼠選擇
         }
-        groupFinal.interactable = true; //允許 互動
-        groupFinal.blocksRaycasts = true; //允許 滑鼠選擇
-
     }
 
     private void Replay()

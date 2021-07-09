@@ -9,11 +9,12 @@ public class MenuManager : MonoBehaviour
     //需要一個公開的方法
     public void StartGame()
     {
+        Player.Life = 3; 
         //MonoBehavior.(<-不用寫)Invoke 延遲呼叫
-        Invoke("DelayStartGame()", 1.1f);
+        Invoke("DelayStartGame", 1.1f);
     }
 
-    private void DelayStartGame()
+    public void DelayStartGame()
     {
         //場景管理.載入場景("場景名稱")
         //Application.LoadLevel("遊戲畫面");//綠色蚯蚓：過時的API，建議換新的

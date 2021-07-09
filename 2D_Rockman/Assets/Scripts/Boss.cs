@@ -23,7 +23,7 @@ public class Boss : Enemy
     ///魔王狀態
     /// </summary>
     public StateBoss stateBoss;
-
+    public Player playerScript;
 
     public override void Hit(float damage)//把Enemy裡的Hit搬過來
     {
@@ -39,8 +39,12 @@ public class Boss : Enemy
 
     protected override void Dead()
     {
+        playerScript = player.GetComponent<Player>();
+        playerScript.win = true; 
+         
         base.Dead();
         StartCoroutine(player.GetComponent<Player>().GameOver("You Win!!")); 
+
     }
     protected override void Start() 
     {
